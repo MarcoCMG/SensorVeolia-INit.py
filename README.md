@@ -3,3 +3,29 @@ Naviguez dossier : /config/custom_components/veolia/ (ou chemin Samba/SSH).
 Sauvegardez ancien : Renommez __init__.py en __init__.py.old.
 
 Remplacez : Copiez le nouveau __init__.py
+
+
+Description
+Intégration custom Home Assistant pour sensor Veolia eau (consommation quotidienne/mensuelle/index). Version fixée pour HA 2026 : résout le blocage critique d'imports au démarrage (erreurs blocking calls sur VeoliaClient/debug). Compatible HACS et UI config.
+​
+
+Problème résolu
+Après maj HA 2026, l'ancien __init__.py plantait au setup_entry :
+
+Imports directs .VeoliaClient et .debug causaient ConfigEntryNotReady permanent.
+
+Manque timedelta import bloquait SCAN_INTERVAL.
+
+Pas de gestion async/executor pour modules sensibles.
+​
+
+Modifications clés
+Imports différés en executor : importlib.import_module() via loop.run_in_executor() évite blocage HA core.
+
+Decorateur préservé : Appliqué dynamiquement sur setup pour garder debug original.
+
+Gestion erreurs renforcée : Logs détaillés, UpdateFailed avec exc chaining.
+
+Cleanup simplifié : Unload robuste sans platforms list.
+
+Ajout logs succès : "✅ Veolia integration loaded successfully".
